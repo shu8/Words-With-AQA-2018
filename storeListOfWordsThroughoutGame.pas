@@ -3,7 +3,7 @@
 // written by the AQA Programmer Team
 // developed using Delphi XE5
 
-program paper1_alvl_2018_pascal_pre_0_0_6;
+program storeListOfWordsThroughoutGame;
 
 {$APPTYPE CONSOLE}
 
@@ -362,7 +362,8 @@ procedure DisplayTilesInHand(PlayerTiles : string);
 
 procedure HaveTurn(PlayerName : string; var PlayerTiles : string; var PlayerTilesPlayed : integer;
 var PlayerScore : integer; TileDictionary : TTileDictionary; var TileQueue : QueueOfTiles;
-var AllowedWords : TStringArray; MaxHandSize : integer; NoOfEndOfTurnTiles : integer);
+var AllowedWords : TStringArray; MaxHandSize : integer; NoOfEndOfTurnTiles : integer;
+var WordPlayed : string);
   var
     NewTileChoice : string;
     ValidChoice : boolean;
@@ -387,6 +388,7 @@ var AllowedWords : TStringArray; MaxHandSize : integer; NoOfEndOfTurnTiles : int
           begin
             ValidChoice := True;
             FillHandWithTiles(TileQueue, PlayerTiles, MaxHandSize);
+            WordPlayed := '';
           end
         else
           begin
@@ -403,6 +405,7 @@ var AllowedWords : TStringArray; MaxHandSize : integer; NoOfEndOfTurnTiles : int
                     writeln;
                     writeln('Valid word');
                     writeln;
+                    WordPlayed := Choice;
                     UpdateAfterAllowedWord(Choice, PlayerTiles, PlayerScore, PlayerTilesPlayed, TileDictionary, AllowedWords);
                     NewTileChoice := GetNewTileChoice();
                   end;
@@ -412,6 +415,7 @@ var AllowedWords : TStringArray; MaxHandSize : integer; NoOfEndOfTurnTiles : int
                 writeln;
                 writeln('Not a valid attempt, you lose your turn.');
                 writeln;
+                WordPlayed := '';
               end;
             if not(NewTileChoice = '4') then
               AddEndOfTurnTiles(TileQueue, PlayerTiles, NewTileChoice, Choice);
@@ -447,6 +451,10 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
     PlayerTwoTilesPlayed : integer;
     PlayerOneTiles : string;
     PlayerTwoTiles : string;
+    PlayerOneWordsPlayed : array of string;
+    PlayerTwoWordsPlayed : array of string;
+    WordPlayed : string;
+    WordsPlayedArrayLength, Counter : integer;
     TileQueue : QueueOfTiles;
   begin
     PlayerOneScore := 50;
@@ -454,6 +462,8 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
     PlayerOneTilesPlayed := 0;
     PlayerTwoTilesPlayed := 0;
     TileQueue := QueueOfTiles.Create(20);
+    SetLength(PlayerOneWordsPlayed, 0);
+    SetLength(PlayerTwoWordsPlayed, 0);
     if RandomStart then
       begin
         PlayerOneTiles := GetStartingHand(TileQueue, StartHandSize);
@@ -466,16 +476,40 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
       end;
     while (PlayerOneTilesPlayed <= MaxTilesPlayed) and (PlayerTwoTilesPlayed <= MaxTilesPlayed) and (length(PlayerOneTiles) < MaxHandSize) and (length(PlayerTwoTiles) < MaxHandSize) do
       begin
-        HaveTurn('Player One', PlayerOneTiles, PlayerOneTilesPlayed, PlayerOneScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles);
+        HaveTurn('Player One', PlayerOneTiles, PlayerOneTilesPlayed, PlayerOneScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles, WordPlayed);
+
+        if WordPlayed <> '' then
+          begin
+            WordsPlayedArrayLength := Length(PlayerOneWordsPlayed);
+            SetLength(PlayerOneWordsPlayed, WordsPlayedArrayLength + 1);
+            PlayerOneWordsPlayed[WordsPlayedArrayLength] := WordPlayed;
+          end;
+
         writeln;
         write('Press Enter to continue');
         readln;
         writeln;
-        HaveTurn('Player Two', PlayerTwoTiles, PlayerTwoTilesPlayed, PlayerTwoScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles);
+
+        HaveTurn('Player Two', PlayerTwoTiles, PlayerTwoTilesPlayed, PlayerTwoScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles, WordPlayed);
+
+        if WordPlayed <> '' then
+          begin
+            WordsPlayedArrayLength := Length(PlayerTwoWordsPlayed);
+            SetLength(PlayerTwoWordsPlayed, WordsPlayedArrayLength + 1);
+            PlayerTwoWordsPlayed[WordsPlayedArrayLength] := WordPlayed;
+          end;
       end;
     UpdateScoreWithPenalty(PlayerOneScore, PlayerOneTiles, TileDictionary);
     UpdateScoreWithPenalty(PlayerTwoScore, PlayerTwoTiles, TileDictionary);
     DisplayWinner(PlayerOneScore, PlayerTwoScore);
+
+    writeln('Words played by Player 1:');
+    for Counter := 0 to Length(PlayerOneWordsPlayed)-1 do
+      writeln(PlayerOneWordsPlayed[Counter]);
+
+    writeln('Words played by Player 2:');
+    for Counter := 0 to Length(PlayerTwoWordsPlayed)-1 do
+      writeln(PlayerTwoWordsPlayed[Counter]);
   end;
 
 procedure DisplayMenu();
