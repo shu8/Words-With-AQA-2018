@@ -3,7 +3,7 @@
 // written by the AQA Programmer Team
 // developed using Delphi XE5
 
-program paper1_alvl_2018_pascal_pre_0_0_6;
+program preventSameTileAddingToQueueTwiceInRow;
 
 {$APPTYPE CONSOLE}
 
@@ -133,6 +133,9 @@ procedure QueueOfTiles.Add();
     if Rear < MaxSize - 1 then
       begin
         RandNo := Random(26);
+        if Rear > 0 then
+          while chr(65 + RandNo) = Contents[Rear] do
+            RandNo := Random(26);
         Rear := Rear + 1;
         Contents[Rear] := chr(65 + RandNo);
       end;

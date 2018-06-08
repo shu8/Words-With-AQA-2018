@@ -3,7 +3,7 @@
 // written by the AQA Programmer Team
 // developed using Delphi XE5
 
-program paper1_alvl_2018_pascal_pre_0_0_6;
+program checkWordIsValidBinarySearch;
 
 {$APPTYPE CONSOLE}
 
@@ -242,16 +242,25 @@ function CheckWordIsInTiles(Word : string; PlayerTiles : string) : boolean;
 function CheckWordIsValid(Word : string; AllowedWords : TStringArray) : boolean;
   var
     ValidWord : boolean;
-    Count : integer;
+    StartPos, EndPos, MidPos : integer;
   begin
     ValidWord := False;
-    Count := 0;
-    while (Count < length(AllowedWords)) and (ValidWord = False) do
+    StartPos := 0;
+    EndPos := Length(AllowedWords);
+
+    while not ValidWord do
       begin
-        if AllowedWords[Count] = Word then
-          ValidWord := True;
-        Count := Count + 1;
+        MidPos := (StartPos + EndPos) DIV 2;
+        if StartPos = EndPos then
+          break
+        else if AllowedWords[MidPos] = Word then
+          ValidWord := True
+        else if AllowedWords[MidPos] < Word then
+          StartPos := MidPos + 1
+        else if AllowedWords[MidPos] > Word then
+          EndPos := MidPos - 1;
       end;
+
     CheckWordIsValid := ValidWord;
   end;
 

@@ -3,7 +3,7 @@
 // written by the AQA Programmer Team
 // developed using Delphi XE5
 
-program paper1_alvl_2018_pascal_pre_0_0_6;
+program showPossibleHighestScoringWordAfterMove;
 
 {$APPTYPE CONSOLE}
 
@@ -439,6 +439,27 @@ procedure DisplayWinner(PlayerOneScore : integer; PlayerTwoScore : integer);
     writeln;
   end;
 
+procedure ShowHighestPossibleScoreWithHand(Hand: string; AllowedWords: TStringArray; TileDictionary: TTileDictionary);
+  var
+    Counter : integer;
+    CurrentWordScore : integer;
+    CurrentHighestScore : integer;
+    CurrentBestWord : string;
+  begin
+    CurrentHighestScore := 0;
+    for Counter := 0 to Length(AllowedWords)-1 do
+      if CheckWordIsInTiles(AllowedWords[Counter], Hand) then
+        begin
+          CurrentWordScore := GetScoreForWord(AllowedWords[Counter], TileDictionary);
+          if CurrentWordScore > CurrentHighestScore then
+            begin
+              CurrentBestWord := AllowedWords[Counter];
+              CurrentHighestScore := CurrentWordScore;
+            end;
+        end;
+    writeln('The highest scoring word you had in your hand was: ', CurrentBestWord, ' of score ', CurrentHighestScore);
+  end;
+
 procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary; RandomStart : boolean; StartHandSize : integer; MaxHandSize : integer; MaxTilesPlayed : integer; NoOfEndOfTurnTiles : integer);
   var
     PlayerOneScore : integer;
@@ -447,6 +468,8 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
     PlayerTwoTilesPlayed : integer;
     PlayerOneTiles : string;
     PlayerTwoTiles : string;
+    CopyOfPlayerOneTiles : string;
+    CopyOfPlayerTwoTiles : string;
     TileQueue : QueueOfTiles;
   begin
     PlayerOneScore := 50;
@@ -466,12 +489,16 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
       end;
     while (PlayerOneTilesPlayed <= MaxTilesPlayed) and (PlayerTwoTilesPlayed <= MaxTilesPlayed) and (length(PlayerOneTiles) < MaxHandSize) and (length(PlayerTwoTiles) < MaxHandSize) do
       begin
+        CopyOfPlayerOneTiles := PlayerOneTiles;
         HaveTurn('Player One', PlayerOneTiles, PlayerOneTilesPlayed, PlayerOneScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles);
+        ShowHighestPossibleScoreWithHand(CopyOfPlayerOneTiles, AllowedWords, TileDictionary);
         writeln;
         write('Press Enter to continue');
         readln;
         writeln;
+        CopyOfPlayerTwoTiles := PlayerTwoTiles;
         HaveTurn('Player Two', PlayerTwoTiles, PlayerTwoTilesPlayed, PlayerTwoScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles);
+        ShowHighestPossibleScoreWithHand(CopyOfPlayerTwoTiles, AllowedWords, TileDictionary);
       end;
     UpdateScoreWithPenalty(PlayerOneScore, PlayerOneTiles, TileDictionary);
     UpdateScoreWithPenalty(PlayerTwoScore, PlayerTwoTiles, TileDictionary);

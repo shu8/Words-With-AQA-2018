@@ -3,7 +3,7 @@
 // written by the AQA Programmer Team
 // developed using Delphi XE5
 
-program paper1_alvl_2018_pascal_pre_0_0_6;
+program playGameMenuValidation;
 
 {$APPTYPE CONSOLE}
 
@@ -323,15 +323,19 @@ function GetChoice() : string;
   var
     Choice : string;
   begin
-    writeln;
-    writeln('Either:');
-    writeln('     enter the word you would like to play OR');
-    writeln('     press 1 to display the letter values OR');
-    writeln('     press 4 to view the tile queue OR');
-    writeln('     press 7 to view your tiles again OR');
-    writeln('     press 0 to fill hand and stop the game.');
-    write('> ');
-    readln(Choice);
+    repeat
+      begin
+        writeln;
+        writeln('Either:');
+        writeln('     enter the word you would like to play OR');
+        writeln('     press 1 to display the letter values OR');
+        writeln('     press 4 to view the tile queue OR');
+        writeln('     press 7 to view your tiles again OR');
+        writeln('     press 0 to fill hand and stop the game.');
+        write('> ');
+        readln(Choice);
+      end
+      until (Choice = '1') or (Choice = '4') or (Choice = '7') or (Choice = '0') or (Length(choice) > 2);
     writeln;
     Choice := UpperCase(Choice);
     GetChoice := Choice;

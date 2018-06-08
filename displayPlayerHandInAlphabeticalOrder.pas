@@ -3,7 +3,7 @@
 // written by the AQA Programmer Team
 // developed using Delphi XE5
 
-program paper1_alvl_2018_pascal_pre_0_0_6;
+program displayPlayerHandInAlphabeticalOrder;
 
 {$APPTYPE CONSOLE}
 
@@ -355,8 +355,20 @@ function GetNewTileChoice() : string;
   end;
 
 procedure DisplayTilesInHand(PlayerTiles : string);
+  Var
+    Counter, InnerCounter : integer;
+    temp : char;
   begin
     writeln;
+    writeln(PlayerTiles);
+    for Counter := 0 to Length(PlayerTiles)-1 do
+      for InnerCounter := 1 to Length(PlayerTiles)-1 do //NOTE: THE RANGE!! don't look at the last item because there's nothing on the right of it!
+        if PlayerTiles[InnerCounter + 1] < PlayerTiles[InnerCounter] then
+          begin
+            temp := PlayerTiles[InnerCounter];
+            PlayerTiles[InnerCounter] := PlayerTiles[InnerCounter + 1];
+            PlayerTiles[InnerCounter + 1] := temp;
+          end;
     writeln('Your current hand: ', PlayerTiles);
   end;
 
