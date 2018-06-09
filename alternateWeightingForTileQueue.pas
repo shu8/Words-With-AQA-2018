@@ -129,12 +129,14 @@ function QueueOfTiles.Remove() : string;
 procedure QueueOfTiles.Add();
   var
     RandNo : integer;
+    WeightedString : string;
   begin
+    WeightedString := 'AAAAAABBBBBCCCCCCDDDDDDDDDDEEEEEEEEEEEEEEFFFFFFFFFFFFFGGGGGHHHHIIIJJJJKKKLLLMMMMMMMMNNNNNNNOOOOOPPPPPPPQQRRRRRSSSSSSTTTTTUUUUUVVVVVVVWWWWXXYYZZ';
     if Rear < MaxSize - 1 then
       begin
         RandNo := Random(26);
         Rear := Rear + 1;
-        Contents[Rear] := chr(65 + RandNo);
+        Contents[Rear] := WeightedString[1 + Random(Length(WeightedString))];
       end;
   end;
 

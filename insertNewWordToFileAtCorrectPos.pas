@@ -487,7 +487,31 @@ procedure DisplayMenu();
     writeln;
     writeln('1. Play game with random start hand');
     writeln('2. Play game with training start hand');
+    writeln('3. Add a new word to the words file');
     writeln('9. Quit');
+  end;
+
+procedure InsertNewWordToWordsFile(AllowedWords : TStringArray);
+  Var
+    WordToInsert : String;
+    CorrectPos : Integer;
+    Count : Integer;
+    WordsFile : textfile;
+  begin
+    AssignFile(WordsFile, 'aqawords.txt');
+    Rewrite(WordsFile);
+    writeln('Please enter the word you want to insert');
+    readln(WordToInsert);
+    for Count := 0 to Length(AllowedWords)-1 do
+      if WordToInsert > AllowedWords[Count] then
+        CorrectPos := Count - 1;
+    for Count := 0 to CorrectPos do
+      writeln(WordsFile, AllowedWords[Count]);
+
+    writeln(WordsFile, WordToInsert);
+
+    for Count := CorrectPos + 1 to Length(AllowedWords)-1 do
+      writeln(WordsFile, AllowedWords[Count]);
   end;
 
 procedure Main();
@@ -521,7 +545,9 @@ procedure Main();
         if Choice = '1' then
           PlayGame(AllowedWords, TileDictionary, True, StartHandSize, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles)
         else if Choice = '2' then
-          PlayGame(AllowedWords, TileDictionary, False, 15, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles);
+          PlayGame(AllowedWords, TileDictionary, False, 15, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles)
+        else if Choice = '3' then
+          InsertNewWordToWordsFile(AllowedWords);
       end;
   end;
 
