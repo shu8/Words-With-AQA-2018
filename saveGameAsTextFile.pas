@@ -439,7 +439,41 @@ procedure DisplayWinner(PlayerOneScore : integer; PlayerTwoScore : integer);
     writeln;
   end;
 
-procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary; RandomStart : boolean; StartHandSize : integer; MaxHandSize : integer; MaxTilesPlayed : integer; NoOfEndOfTurnTiles : integer);
+procedure SaveCurrentGameState(PlayerOneTiles : String; PlayerOneTilesPlayed, PlayerOneScore : Integer; PlayerTwoTiles : String; PlayerTwoTilesPlayed, PlayerTwoScore : Integer);
+  var
+    SaveGameFile : textfile;
+  begin
+    AssignFile(SaveGameFile, 'saved.txt');
+    rewrite(SaveGameFile);
+    writeln(SaveGameFile, PlayerOneTiles);
+    writeln(SaveGameFile, PlayerOneTilesPlayed);
+    writeln(SaveGameFile, PlayerOneScore);
+    writeln(SaveGameFile, PlayerTwoTiles);
+    writeln(SaveGameFile, PlayerTwoTilesPlayed);
+    writeln(SaveGameFile, PlayerTwoScore);
+
+    CloseFile(SaveGameFile);
+    writeln('Game Saved to saved.txt');
+  end;
+
+procedure LoadGameState(Var PlayerOneTiles : string; Var PlayerOneTilesPlayed, PlayerOneScore : integer; Var PlayerTwoTiles : string; Var PlayerTwoTilesPlayed, PlayerTwoScore : integer);
+  var
+     SaveGameFile : textfile;
+   begin
+     AssignFile(SaveGameFile, 'saved.txt');
+     reset(SaveGameFile);
+     readln(SaveGameFile, PlayerOneTiles);
+     readln(SaveGameFile, PlayerOneTilesPlayed);
+     readln(SaveGameFile, PlayerOneScore);
+     readln(SaveGameFile, PlayerTwoTiles);
+     readln(SaveGameFile, PlayerTwoTilesPlayed);
+     readln(SaveGameFile, PlayerTwoScore);
+
+     CloseFile(SaveGameFile);
+     writeln('Game loaded from to saved.txt');
+   end;
+
+procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary; RandomStart : boolean; StartHandSize : integer; MaxHandSize : integer; MaxTilesPlayed : integer; NoOfEndOfTurnTiles : integer; LoadGame : boolean);
   var
     PlayerOneScore : integer;
     PlayerTwoScore : integer;
@@ -448,22 +482,29 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
     PlayerOneTiles : string;
     PlayerTwoTiles : string;
     TileQueue : QueueOfTiles;
+    SaveGameChoice : string;
   begin
-    PlayerOneScore := 50;
-    PlayerTwoScore := 50;
-    PlayerOneTilesPlayed := 0;
-    PlayerTwoTilesPlayed := 0;
     TileQueue := QueueOfTiles.Create(20);
-    if RandomStart then
-      begin
-        PlayerOneTiles := GetStartingHand(TileQueue, StartHandSize);
-        PlayerTwoTiles := GetStartingHand(TileQueue, StartHandSize);
-      end
+    if LoadGame then
+       LoadGameState(PlayerOneTiles, PlayerOneTilesPlayed, PlayerOneScore, PlayerTwoTiles, PlayerTwoTilesPlayed, PlayerTwoScore)
     else
       begin
-        PlayerOneTiles := 'BTAHANDENONSARJ';
-        PlayerTwoTiles := 'CELZXIOTNESMUAA';
+        PlayerOneScore := 50;
+        PlayerTwoScore := 50;
+        PlayerOneTilesPlayed := 0;
+        PlayerTwoTilesPlayed := 0;
+        if RandomStart then
+          begin
+            PlayerOneTiles := GetStartingHand(TileQueue, StartHandSize);
+            PlayerTwoTiles := GetStartingHand(TileQueue, StartHandSize);
+          end
+        else
+          begin
+            PlayerOneTiles := 'BTAHANDENONSARJ';
+            PlayerTwoTiles := 'CELZXIOTNESMUAA';
+          end;
       end;
+
     while (PlayerOneTilesPlayed <= MaxTilesPlayed) and (PlayerTwoTilesPlayed <= MaxTilesPlayed) and (length(PlayerOneTiles) < MaxHandSize) and (length(PlayerTwoTiles) < MaxHandSize) do
       begin
         HaveTurn('Player One', PlayerOneTiles, PlayerOneTilesPlayed, PlayerOneScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles);
@@ -472,6 +513,10 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
         readln;
         writeln;
         HaveTurn('Player Two', PlayerTwoTiles, PlayerTwoTilesPlayed, PlayerTwoScore, TileDictionary, TileQueue, AllowedWords, MaxHandSize, NoOfEndOfTurnTiles);
+        writeln('Do you want to save the current state of the game to a text file? Y or N');
+        readln(SaveGameChoice);
+        if SaveGameChoice = 'Y' then
+          SaveCurrentGameState(PlayerOneTiles, PlayerOneTilesPlayed, PlayerOneScore, PlayerTwoTiles, PlayerTwoTilesPlayed, PlayerTwoScore);
       end;
     UpdateScoreWithPenalty(PlayerOneScore, PlayerOneTiles, TileDictionary);
     UpdateScoreWithPenalty(PlayerTwoScore, PlayerTwoTiles, TileDictionary);
@@ -487,6 +532,7 @@ procedure DisplayMenu();
     writeln;
     writeln('1. Play game with random start hand');
     writeln('2. Play game with training start hand');
+    writeln('3. Load previous game from text file');
     writeln('9. Quit');
   end;
 
@@ -519,9 +565,11 @@ procedure Main();
         write('Enter your choice: ');
         readln(Choice);
         if Choice = '1' then
-          PlayGame(AllowedWords, TileDictionary, True, StartHandSize, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles)
+          PlayGame(AllowedWords, TileDictionary, True, StartHandSize, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles, False)
         else if Choice = '2' then
-          PlayGame(AllowedWords, TileDictionary, False, 15, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles);
+          PlayGame(AllowedWords, TileDictionary, False, 15, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles, False)
+        else if Choice = '3' then
+          PlayGame(AllowedWords, TileDictionary, False, 15, MaxHandSize, MaxTilesPlayed, NoOfEndOfTurnTiles, True);
       end;
   end;
 
