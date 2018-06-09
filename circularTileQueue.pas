@@ -3,7 +3,7 @@
 // written by the AQA Programmer Team
 // developed using Delphi XE5
 
-program paper1_alvl_2018_pascal_pre_0_0_6;
+program circularTileQueue;
 
 {$APPTYPE CONSOLE}
 
@@ -34,7 +34,9 @@ type
     protected
       Contents : array of string;
       Rear : integer;
+      Front : integer;
       MaxSize : integer;
+      CurrentSize : integer;
     public
       constructor Create(Max : integer);
       function IsEmpty() : boolean;
@@ -93,6 +95,8 @@ constructor QueueOfTiles.Create(Max : integer);
     MaxSize := Max;
     SetLength(Contents, MaxSize);
     Rear := -1;
+    Front := 0;
+    CurrentSize := 0;
     for Count := 0 to MaxSize - 1 do
       begin
         Contents[Count] := '';
@@ -102,7 +106,7 @@ constructor QueueOfTiles.Create(Max : integer);
 
 function QueueOfTiles.IsEmpty() : boolean;
   begin
-    if Rear = -1 then
+    if CurrentSize = 0 then
       IsEmpty := True
     else
       IsEmpty := False;
@@ -111,17 +115,15 @@ function QueueOfTiles.IsEmpty() : boolean;
 function QueueOfTiles.Remove() : string;
   var
     Item : string;
-    Count : integer;
   begin
     if IsEmpty() then
       Item := ''
     else
       begin
-        Item := Contents[0];
-        for Count := 1 to Rear  do
-          Contents[Count-1] := Contents[Count];
-        Contents[Rear] := '';
-        Rear := Rear - 1;
+        Item := Contents[Front];
+        Contents[Front] := '';
+        CurrentSize := CurrentSize - 1;
+        Front := (Front + 1) MOD MaxSize;
       end;
     Remove := Item;
    end;
@@ -130,10 +132,11 @@ procedure QueueOfTiles.Add();
   var
     RandNo : integer;
   begin
-    if Rear < MaxSize - 1 then
+    if (CurrentSize < MaxSize) then
       begin
+        Rear := (Rear + 1) MOD MaxSize;
         RandNo := Random(26);
-        Rear := Rear + 1;
+        CurrentSize := CurrentSize + 1;
         Contents[Rear] := chr(65 + RandNo);
       end;
   end;
@@ -146,7 +149,16 @@ procedure QueueOfTiles.Show();
       begin
         writeln;
         writeln('The contents of the queue are: ');
-        for Item := 0 to Rear do
+        if Rear < Front then
+          begin
+            writeln(Front, Rear);
+            for Item := Front to MaxSize-1 do
+              write(Contents[Item]);
+            for Item := 0 to Rear do
+              write(Contents[Item])
+          end
+        else
+          for Item := Front to Rear do
           write(Contents[Item]);
         writeln;
       end;
