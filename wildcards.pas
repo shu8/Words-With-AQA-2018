@@ -167,7 +167,8 @@ function CreateTileDictionary() : TTileDictionary;
           else TileDictionary.Add(chr(65 + count), 5);
         end;
       end;
-      CreateTileDictionary := TileDictionary;
+    TileDictionary.Add('*', 0); //ASCII for '*' -- lookup using ord('*')
+    CreateTileDictionary := TileDictionary;
   end;
 
 procedure DisplayTileValues(TileDictionary : TTileDictionary; AllowedWords : TStringArray);
@@ -239,19 +240,28 @@ function CheckWordIsInTiles(Word : string; PlayerTiles : string) : boolean;
     CheckWordIsInTiles := InTiles;
   end;
 
-function CheckWordIsValid(Word : string; AllowedWords : TStringArray) : boolean;
+function CheckWordIsValid(Word : string; AllowedWords : TStringArray; PlayerTiles : string) : boolean;
   var
     ValidWord : boolean;
-    Count : integer;
+    Count, LetterCount : integer;
+    CurrentWordFromFile : string;
   begin
     ValidWord := False;
     Count := 0;
-    while (Count < length(AllowedWords)) and (ValidWord = False) do
+    while ValidWord = False do
       begin
-        if AllowedWords[Count] = Word then
-          ValidWord := True;
-        Count := Count + 1;
-      end;
+        ValidWord := True;
+        CurrentWordFromFile := AllowedWords[Count];
+        for LetterCount := 1 to length(CurrentWordFromFile) do
+          begin
+            if pos(CurrentWordFromFile[LetterCount], PlayerTiles) > 0 then
+              Delete(PlayerTiles, pos(Word[LetterCount], PlayerTiles), 1)
+            else if pos('*', PlayerTiles) > 0 then
+              Delete(PlayerTiles, pos('*', PlayerTiles), 1)
+            else
+              ValidWord := False;
+          end;
+        end;
     CheckWordIsValid := ValidWord;
   end;
 
@@ -397,7 +407,9 @@ var AllowedWords : TStringArray; MaxHandSize : integer; NoOfEndOfTurnTiles : int
               ValidWord := CheckWordIsInTiles(Choice, PlayerTiles);
             if ValidWord then
               begin
-                ValidWord := CheckWordIsValid(Choice, AllowedWords);
+                writeln('is in tiles');
+                ValidWord := CheckWordIsValid(Choice, AllowedWords, PlayerTiles);
+                writeln('valid from file? ', ValidWord);
                 if ValidWord then
                   begin
                     writeln;
@@ -461,8 +473,8 @@ procedure PlayGame(AllowedWords : TStringArray; TileDictionary : TTileDictionary
       end
     else
       begin
-        PlayerOneTiles := 'BTAHANDENONSARJ';
-        PlayerTwoTiles := 'CELZXIOTNESMUAA';
+        PlayerOneTiles := 'BTAHANDENONSAR*';
+        PlayerTwoTiles := 'CELZXIOTNESMUA*';
       end;
     while (PlayerOneTilesPlayed <= MaxTilesPlayed) and (PlayerTwoTilesPlayed <= MaxTilesPlayed) and (length(PlayerOneTiles) < MaxHandSize) and (length(PlayerTwoTiles) < MaxHandSize) do
       begin
